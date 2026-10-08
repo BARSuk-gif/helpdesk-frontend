@@ -1,0 +1,263 @@
+* {
+  box-sizing: border-box;
+  font-size: 17px;
+}
+
+/* общий контейнер */
+.container {
+  display: flex;
+  max-width: 1200px;
+  width: 100%;
+  background-color: #bbbbbb33;
+  padding: 20px;
+  position: relative;
+  flex-direction: column;
+}
+
+.frame-container {
+  display: flex;
+  flex-direction: row;
+  padding: 10px;
+  gap: 10px;
+  height: 30px;
+  background-color: #bbbbbb57;
+}
+
+.circle {
+  background-color: #bbbbbbf6;
+  height: 10px;
+  width: 10px;
+  border-radius: 5px;
+}
+
+.form-ticket-view {
+  display: flex;
+  background-image: url('../img/kletka.jpg');
+  background-repeat: no-repeat;
+  /* background-position: center center;  */
+  background-size: cover;
+  padding: 20px;
+  flex-direction: column;
+  align-items: flex-end;
+  border: 2px solid rgba(0, 0, 0, 0.75);
+}
+
+.btn-add-ticket {
+  border: 2px solid rgba(0, 0, 0, 0.75);
+  border-radius: 10px;
+  background-color: white;
+  margin-bottom: 20px;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.fieldset-ticket {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  border: 2px solid rgba(0, 0, 0, 075);
+  padding: 10px;   
+  margin: 0;
+}
+
+.ticket-container {
+  display: flex;
+  width: 100%;
+  background-color: white;
+  flex-direction: column;
+  gap: 0;
+  align-items: stretch;
+  padding: 0;
+  margin: 0;
+}
+
+.legend {
+  display: none;
+}
+
+.ticket-status {
+  appearance: none;             /* отключить системный вид */
+  -webkit-appearance: none;     /* для Safari */
+  width: 30px;
+  height: 30px;
+  border: 2px solid rgba(0, 0, 0, 0.75);
+  border-radius: 50%;
+  background-color: white;
+  cursor: pointer;
+  position: relative;
+  flex: 0 0 auto;
+  margin: 0; 
+}
+
+.ticket-status:checked {
+  background-color: white;   
+  border-color: rgba(0, 0, 0, 0.75);
+}
+
+.ticket-status:checked::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 14px;
+  border: solid rgba(0, 0, 0, 0.75);
+  border-width: 0 2px 2px 0;
+  transform: translate(-50%, -60%) rotate(45deg);
+}
+
+.ticket-name {
+  flex: 1 1 auto; 
+  min-width: 0;
+  border: none;
+  cursor: pointer;
+}
+
+.ticket-data {
+  max-width: 180px;
+  flex: 0 0 180px;
+  font-size: 19px;
+  border: none;
+}
+
+.ticket-data::-webkit-calendar-picker-indicator {
+  display: none;
+  -webkit-appearance: none;
+}
+
+.btn-modify-ticket {
+  background-image: url('../img/pensil1.jpg');
+  background-color: white;
+  background-size: 70%;
+  background-position: center;
+  background-repeat: no-repeat;
+  border: 2px solid rgba(0, 0, 0, 0.75);
+  border-radius: 50%;
+  height: 30px;
+  width: 30px;
+  flex: 0 0 auto;
+  cursor: pointer;
+  padding: 0;
+}
+
+.btn-delete-ticket {
+  height: 30px;
+  width: 30px;
+  flex: 0 0 auto;
+  background-color: white;
+  border: 2px solid rgba(0, 0, 0, 0.75);
+  border-radius: 50%;
+  cursor: pointer;
+  padding: 0;
+}
+
+.btn-add-ticket:hover,
+.btn-modify-ticket:hover,
+.btn-delete-ticket:hover {
+  background-color: #f0f0f0;    /* лёгкая подсветка */
+}
+
+.btn-add-ticket:active,
+.btn-modify-ticket:active,
+.btn-delete-ticket:active {
+  transform: scale(0.95);       /* лёгкое «нажатие» */
+}
+
+.ticket-description {
+  display: none;
+  padding-top: 15px;
+  padding-left: 50px;
+  flex: 1 1 100%; 
+  min-height: 60px;
+  resize: vertical;
+  border: none;
+}
+
+.active-description {
+  display: flex;
+}
+
+.active {
+  display: flex;
+}
+
+/* --------------------модальные окна------------------------- */
+
+.modal-root {
+  position: fixed;                           /* поверх всего, привязан к окну */ 
+  inset: 0;                                  /* top/right/bottom/left: 0 */
+  background-color: rgba(0, 0, 0, 0.5);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;            
+}
+
+.active-modal-root {
+  display: flex;
+}
+
+.modal-ticket {
+  display: none;
+  background-color: white;
+  border-radius: 10px;
+  border: 2px solid rgba(0, 0, 0, 0.75);
+  padding: 20px;
+  max-width: 500px;
+  width: 100%;
+  overflow: auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.active-modal {
+  display: block;
+}
+
+.modal-title {
+  margin: 0 0 16px;
+  font-size: 20px;
+  text-align: center;
+}    
+
+.form-ticket {
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  margin: 10px 0 10px;
+  font-size: 19px;
+}
+
+.name-add-ticket,
+.name-upload-ticket {
+  border: 2px solid rgba(0, 0, 0, 0.75);
+}
+
+.description-add-ticket,
+.description-upload-ticket {
+  border: 2px solid rgba(0, 0, 0, 0.75);
+}
+
+.btn-container {
+  display: flex;
+  margin-top: 20px;
+  gap: 10px;
+  flex-direction: row;
+  justify-content: flex-end;
+}
+
+.btn-add-cancel,
+.btn-upload-cancel,
+.btn-delete-cancel,
+.btn-add-save,
+.btn-upload-save,
+.btn-delete-save {
+  padding: 10px;
+  border-radius: 10px;
+  border: 2px solid rgba(0, 0, 0, 0.75);
+  background-color: white;
+}
