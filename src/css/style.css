@@ -57,7 +57,7 @@
   align-items: center;
   gap: 10px;
   width: 100%;
-  border: 2px solid rgba(0, 0, 0, 0,75);
+  border: 2px solid rgba(0, 0, 0, 0.75);
   padding: 10px;   
   margin: 0;
 }
@@ -185,16 +185,20 @@
 
 /* индикатор загрузки на fieldset */
 .fieldset-ticket.loading {
-  opacity: 0.5;
+  /* opacity: 0.5; */
   pointer-events: none;
+  background-image: url('../img/load.gif');
+  background-repeat: no-repeat;
+  background-size: 32px 32px;
+  background-position: center;
 }
 
-.fieldset-ticket.loading::after {
+/* .fieldset-ticket.loading::after {
   content: 'Загрузка...';
   font-size: 14px;
   color: #666;
   margin-left: 10px;
-}
+} */
 
 /* ошибка на тикете */
 .ticket-error {
