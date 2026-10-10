@@ -57,7 +57,7 @@
   align-items: center;
   gap: 10px;
   width: 100%;
-  border: 2px solid rgba(0, 0, 0, 075);
+  border: 2px solid rgba(0, 0, 0, 0,75);
   padding: 10px;   
   margin: 0;
 }
@@ -181,6 +181,33 @@
 
 .active {
   display: flex;
+}
+
+/* индикатор загрузки на fieldset */
+.fieldset-ticket.loading {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.fieldset-ticket.loading::after {
+  content: 'Загрузка...';
+  font-size: 14px;
+  color: #666;
+  margin-left: 10px;
+}
+
+/* ошибка на тикете */
+.ticket-error {
+  flex: 1 1 100%;
+  color: #c00;
+  font-size: 14px;
+  padding: 4px 0;
+}
+
+/* кнопка в состоянии загрузки */
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* --------------------модальные окна------------------------- */

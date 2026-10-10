@@ -23,10 +23,14 @@ export default class HelpDesk {
     this.addListener();
 
     try {
+      this.view.ticketsContainer.classList.add('loading');
+      this.view.ticketsContainer.textContent = 'Загрузка тикетов...';
       const tickets = await this.ticketService.list();
       this.view.renderList(tickets);
     } catch (err) {
-      this.modalForm.showAddError('Не удалось загрузить тикеты');
+      this.view.ticketsContainer.textContent = 'Не удалось загрузить тикеты';
+    } finally {
+      this.view.ticketsContainer.classList.remove('loading');
     }
   }
 
@@ -36,21 +40,31 @@ export default class HelpDesk {
     this.view.btnAddTicket.addEventListener('click', this.onCreateTicket.bind(this));
 
     // клик по кнопке Ok модалки - добавить тикет
-    const buttonOk = this.modalForm.getAddSaveButton();
-    buttonOk.addEventListener('click', async () => {
+    this.modalForm.getAddSaveButton().addEventListener('click', async () => {
+      const button = this.modalForm.getAddSaveButton();
+      const name = this.modalForm.getAddNameInput().value.trim();
+
+      if (!name) {
+        this.modalForm.showAddError('Введите краткое описание');
+        this.modalForm.getAddNameInput().focus();
+        return;
+      }
+
       try {
+        this.setButtonLoading(button, true);
         await this.addNewTicket();
       } catch (err) {
         const message = err.message.includes('Network')
           ? 'Нет соединения с сервером. Попробуйте позже.'
           : 'Не удалось создать тикет. Проверьте данные и попробуйте снова.';
         this.modalForm.showAddError(message);
+      } finally {
+        this.setButtonLoading(button, false);
       }
     });
 
     //  клик по кнопке Отмена модалки - добавить тикет
-    const buttonCancel = this.modalForm.getAddCancelButton();
-    buttonCancel.addEventListener('click', this.onCloseAddForm.bind(this));
+    this.modalForm.getAddCancelButton().addEventListener('click', this.onCloseAddForm.bind(this));
     //  клик по полю
     this.modalForm.modalRoot.addEventListener('click', (e) => {
       if (e.target === this.modalForm.modalRoot) {
@@ -75,39 +89,49 @@ export default class HelpDesk {
     });
 
     //  клик по кнопке Ok модалки - изменить тикет
-    const buttonUploadOk = this.modalForm.getUploadSaveButton();
-    buttonUploadOk.addEventListener('click', async () => {
-      const name = this.modalForm.getUploadNameInput().value;
-      const description = this.modalForm.getUploadDescriptionInput().value;
+    this.modalForm.getUploadSaveButton().addEventListener('click', async () => {
+      const button = this.modalForm.getUploadSaveButton();
+      const name = this.modalForm.getUploadNameInput().value.trim();
+      const description = this.modalForm.getUploadDescriptionInput().value.trim();
+
+      if (!name) {
+        this.modalForm.showUploadError('Введите краткое описание');
+        this.modalForm.getUploadNameInput().focus();
+        return;
+      }
+
       try {
-        await this.ticketService.update(this.currentEditId, { name, description });
-        const updated = await this.ticketService.get(this.currentEditId);
+        this.setButtonLoading(button, true);
+        const updated = await this.ticketService.update(this.currentEditId, { name, description });
         this.view.updateTicket(this.currentEditId, updated);
         this.onCloseUploadForm();
       } catch (err) {
         this.modalForm.showUploadError('Не удалось обновить тикет');
+      } finally {
+        this.setButtonLoading(button, false);
       }
     });
 
     //  клик по кнопке Отмена модалки - изменить тикет
-    const buttonUploadCancel = this.modalForm.getUploadCancelButton();
-    buttonUploadCancel.addEventListener('click', this.onCloseUploadForm.bind(this));
+    this.modalForm.getUploadCancelButton().addEventListener('click', this.onCloseUploadForm.bind(this));
 
     //  клик по кнопке Ok модалки - удалить тикет
-    const buttonDeleteOk = this.modalForm.getDeleteSaveButton();
-    buttonDeleteOk.addEventListener('click', async () => {
+    this.modalForm.getDeleteSaveButton().addEventListener('click', async () => {
+      const button = this.modalForm.getDeleteSaveButton();
       try {
+        this.setButtonLoading(button, true);
         await this.ticketService.delete(this.currentDeleteId);
         this.view.removeTicket(this.currentDeleteId);
         this.onCloseDeleteForm();
       } catch (err) {
         this.modalForm.showDeleteError('Не удалось удалить тикет');
+      } finally {
+        this.setButtonLoading(button, false);
       }
     });
 
     //  клик по кнопке Отмена модалки - удалить тикет
-    const buttonDeleteCancel = this.modalForm.getDeleteCancelButton();
-    buttonDeleteCancel.addEventListener('click', this.onCloseDeleteForm.bind(this));
+    this.modalForm.getDeleteCancelButton().addEventListener('click', this.onCloseDeleteForm.bind(this));
 
     // клик по кнопкам главной модалки
     this.view.ticketsContainer.addEventListener('click', (e) => {
@@ -128,7 +152,7 @@ export default class HelpDesk {
       // клик по чекбоксу
       if (e.target.matches('.ticket-status')) {
         const fieldset = e.target.closest('.fieldset-ticket');
-        this.onToggleStatus(fieldset.dataset.id, e.target.checked);
+        this.onToggleStatus(fieldset.dataset.id, e.target.checked, e.target);
         return;
       }
 
@@ -202,20 +226,48 @@ export default class HelpDesk {
     this.modalForm.modalRoot.classList.remove('active-modal-root');
   }
 
-  async onToggleStatus(id, status) {
+  async onToggleStatus(id, status, checkbox) {
     try {
+      checkbox.disabled = true;
       await this.ticketService.update(id, { status });
     } catch (err) {
-      const fieldset = this.view.ticketsContainer.querySelector(`[data-id="${id}"]`);
-      const checkbox = fieldset.querySelector('.ticket-status');
       checkbox.checked = !status;
+      this.view.showTicketError(id, 'Не удалось обновить статус');
+    } finally {
+      checkbox.disabled = false;
     }
   }
 
-  onToggleDescription(id) {
+  async onToggleDescription(id) {
     const fieldset = this.view.ticketsContainer.querySelector(`[data-id="${id}"]`);
-    const description = fieldset.querySelector('.ticket-description');
-    description.classList.toggle('active-description');
+    if (!fieldset) return;
+
+    const isOpen = this.view.isDescriptionOpen(id);
+
+    // если уже открыто — просто скрыть
+    if (isOpen) {
+      this.view.toggleDescription(id);
+      return;
+    }
+
+    // если ещё не загружали — запросить
+    const loaded = fieldset.dataset.loaded === 'true';
+
+    if (!loaded) {
+      try {
+        fieldset.classList.add('loading');
+        const ticket = await this.ticketService.get(id);
+        this.view.setDescription(id, ticket.description);
+        fieldset.dataset.loaded = 'true';
+      } catch (err) {
+        this.view.showTicketError(id, 'Не удалось загрузить описание');
+        return;
+      } finally {
+        fieldset.classList.remove('loading');
+      }
+    }
+
+    this.view.toggleDescription(id);
   }
 
   // -------------------------удаление тикета-------------------------------------------------
@@ -233,5 +285,16 @@ export default class HelpDesk {
     // скрываем модалку
     this.modalForm.modalDeleteTicket.classList.remove('active-modal');
     this.modalForm.modalRoot.classList.remove('active-modal-root');
+  }
+
+  setButtonLoading(button, isLoading, loadingText = 'Отправка...') {
+    if (isLoading) {
+      button.dataset.originalText = button.textContent;
+      button.textContent = loadingText;
+      button.disabled = true;
+    } else {
+      button.textContent = button.dataset.originalText || 'Ok';
+      button.disabled = false;
+    }
   }
 }

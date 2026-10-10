@@ -89,7 +89,6 @@ export default class TicketView {
     fieldset.dataset.id = `${ticket.id}`;
 
     fieldset.querySelector('[name="ticket-name"]').value = ticket.name;
-    fieldset.querySelector('[name="ticket-description"]').value = ticket.description ?? '';
     fieldset.querySelector('[name="ticket-status"]').checked = Boolean(ticket.status);
     fieldset.querySelector('[name="ticket-created"]').value = new Date(ticket.created).toISOString().slice(0, 16);
 
@@ -109,13 +108,55 @@ export default class TicketView {
     if (!fieldset) return;
 
     fieldset.querySelector('[name="ticket-name"]').value = ticket.name;
-    fieldset.querySelector('[name="ticket-description"]').value = ticket.description ?? '';
     fieldset.querySelector('[name="ticket-status"]').checked = Boolean(ticket.status);
     fieldset.querySelector('[name="ticket-created"]').value = new Date(ticket.created).toISOString().slice(0, 16);
+
+    // если описание уже загружено — обновить
+    if (fieldset.dataset.loaded === 'true') {
+      fieldset.querySelector('.ticket-description').value = ticket.description ?? '';
+    }
   }
 
   removeTicket(id) {
     const fieldset = this.ticketsContainer.querySelector(`[data-id="${id}"]`);
     if (fieldset) fieldset.remove();
+  }
+
+  setDescription(id, description) {
+    const fieldset = this.ticketsContainer.querySelector(`[data-id="${id}"]`);
+    if (!fieldset) return;
+    fieldset.querySelector('.ticket-description').value = description ?? '';
+  }
+
+  toggleDescription(id) {
+    const fieldset = this.ticketsContainer.querySelector(`[data-id="${id}"]`);
+    if (!fieldset) return null;
+    const description = fieldset.querySelector('.ticket-description');
+    description.classList.toggle('active-description');
+    return description;
+  }
+
+  isDescriptionOpen(id) {
+    const fieldset = this.ticketsContainer.querySelector(`[data-id="${id}"]`);
+    if (!fieldset) return false;
+    return fieldset.querySelector('.ticket-description').classList.contains('active-description');
+  }
+
+  showTicketError(id, message) {
+    const fieldset = this.ticketsContainer.querySelector(`[data-id="${id}"]`);
+    if (!fieldset) return;
+
+    let errorEl = fieldset.querySelector('.ticket-error');
+    if (!errorEl) {
+      errorEl = document.createElement('div');
+      errorEl.className = 'ticket-error';
+      fieldset.append(errorEl);
+    }
+    errorEl.textContent = message;
+    errorEl.hidden = false;
+
+    setTimeout(() => {
+      errorEl.hidden = true;
+    }, 3000);
   }
 }
